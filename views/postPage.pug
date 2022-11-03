@@ -1,0 +1,10 @@
+extends layouts/main-layout.pug
+//- 用 +函式名稱使用 mixin
+block content
+  script.
+    const postId = '!{ postId }'
+  .postContainer
+  
+  +createPostModal(userLoggedIn)
+block scripts 
+  script(src="/js/postPage.js") 
