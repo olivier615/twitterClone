@@ -1,3 +1,7 @@
+let cropper
+let timer
+const selectedUsers = []
+
 $('#postTextarea, #replyTextarea').keyup((event) => {
   const textBox = $(event.target)
   const value = textBox.val().trim()
@@ -366,7 +370,6 @@ const outputPostsWithReplies = (results, container) => {
   })
 }
 
-let cropper;
 $('#filePhoto').change(function () {
   if (this.files && this.files[0]) {
     const reader = new FileReader()
@@ -440,5 +443,122 @@ $('#coverPhotoButton').click(() => {
       contentType: false, //不加入 head 的 contentType
       success: () => location.reload()
     })
+  })
+})
+
+$('#userSearchTextBox').keydown((event) => {
+  clearTimeout(timer)
+  const textBox = $(event.target)
+  let value = textBox.val()
+  if (value == '' && (event.keyCode == 8 || event.which == 8)) { // .which 是 jQuery 的方法，避免在某些瀏覽器 .keyCode 無效時卡住
+    // keycode == 8 delete button
+    // remove user from selection by no value and press backspace
+    selectedUsers.pop()
+    updateSelectedUsersHtml()
+    $('.resultsContainer').html('')
+    if (selectedUsers.length == 0) {
+      $('#createChatButton').prop('disabled', true)
+    }
+    return
+  }
+  timer = setTimeout(() => {
+    value = textBox.val().trim()
+    if (value == '') {
+      $('.resultsContainer').html('')
+    }
+    else {
+      searchUsers(value)
+    }
+  }, 1000)
+})
+
+const outputUsers = (results, container) => {
+  container.html('')
+  results.forEach(result => {
+    const html = createUserHtml(result, true)
+    container.append(html)
+  })
+  if (results.length == 0) {
+    container.append('<span class="noResult">No Result Found</span>')
+  }
+}
+
+const createUserHtml = (userData, showFollowButton) => {
+  const { profilePic, username, firstName, lastName } = userData
+  let followButton = ''
+  const isFollowing = userLoggedIn.following && userLoggedIn.following.includes(userData._id)
+  const text = isFollowing ? 'Following' : 'Follow'
+  const buttonClass = isFollowing ? 'followButton following' : 'followButton'
+  if (showFollowButton && userLoggedIn._id != userData._id) {
+    followButton = `
+    <div class="followButtonContainer">
+      <button class="${ buttonClass }" data-user=${ userData._id }>${ text }</button>
+    </div>
+    `
+  }
+  return `
+  <div class="user">
+    <div class="userImageContainer">
+      <img src="${ profilePic }" />
+    </div>
+    <div class="userDetailContainer">
+      <div class="header">
+        <a href="/profile/${ username }">${ firstName + ' ' + lastName}</a>
+        <span class="username">@${username}</span>
+      </div>
+      </div>
+      ${ followButton }
+  </div>
+  `
+}
+
+const searchUsers = (searchTerm) => {
+  $.get('/api/users', { search: searchTerm }, results => {
+    outputSelectableUsers(results, $('.resultsContainer'))
+  })
+}
+
+const outputSelectableUsers = (results, container) => {
+  container.html('')
+  results.forEach(result => {
+    if (result._id == userLoggedIn._id || selectedUsers.some(u => u._id == result._id)) {
+      // .some() 陣列方法，若查找的項目中至少一項為 true，則返回 true
+      return
+    }
+    const html = createUserHtml(result, false)
+    const element = $(html)
+    element.click(() => userSelected(result))
+    container.append(element)
+  })
+  if (results.length == 0) {
+    container.append('<span class="noResult">No Result Found</span>')
+  }
+}
+
+const userSelected = (user) => {
+  selectedUsers.push(user)
+  updateSelectedUsersHtml()
+  $('#userSearchTextBox').val('').focus()
+  $('.resultsContainer').html('')
+  $('#createChatButton').prop('disabled', false)
+}
+
+const updateSelectedUsersHtml = () => {
+  const elements = []
+  selectedUsers.forEach(user => {
+    const { firstName, lastName } = user
+    const userElement = $(`<span class="selectedUser">${ firstName + ' ' + lastName }</span>`)
+    elements.push(userElement)
+  })
+  $('.selectedUser').remove()
+  $('#selectedUsers').prepend(elements) // 放在選中的元素前面
+}
+
+$('#createChatButton').click((event) => {
+  const data = JSON.stringify(selectedUsers)
+  // in ajax request can only send string as data
+  $.post('/api/chats', { users: data }, chat => {
+    if (!chat || !chat._id) return alert('Invalid response from sever')
+    window.location.href = `/messages/${ chat._id }`
   })
 })

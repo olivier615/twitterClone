@@ -17,6 +17,11 @@ router.get('/', async (req, res, next) => {
     // 如果為 false 則尋找不存在 replyTo 的物件
     delete searchObj.isReply
   }
+  if (searchObj.search !== undefined) {
+    searchObj.content = { $regex: searchObj.search, $options: 'i' }
+    //  $option: 'i'，忽略大小寫，只搜尋值
+    delete searchObj.search
+  }
   // followingOnly 來自於 home.js
   // 這邊的目的是只看的到追蹤中的朋友的 post
   if (searchObj.followingOnly !== undefined) {

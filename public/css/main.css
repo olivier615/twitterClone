@@ -1,4 +1,3 @@
-
 :root {
   --blue: #1fa2f1;
   --blueLight: #98def9;
@@ -12,6 +11,13 @@
   --redBackground: rgba(226, 34, 94, .1);
   --green: rgb(23, 191, 99);
   --greenBackground: rgba(23, 191, 99, .1);
+}
+
+html, body {
+  height: 100%;
+  min-height: 100%;
+  background-color: #fff;
+  font-weight: 400;
 }
 
 * {
@@ -33,9 +39,16 @@ a:hover {
   color: inherit;
 }
 
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 /* 只對 .wrapper 內的 .row 產生作用，其他地方的 .row 不受影響 */
 .wrapper > .row {
   margin: 0;
+  height: 100%;
 }
 
 h1 {
@@ -204,7 +217,7 @@ button i, button span {
 }
 
 .header a, .header span {
-  padding-right: 5px;
+  padding-left: 8px;
 }
 
 .postButtonContainer button:hover {
@@ -450,4 +463,136 @@ button i, button span {
   background-color: var(--lightGrey);
   border: none;
   color: var(--greyText);
+}
+
+.chatPageContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+
+.chatTitleBar {
+  border-bottom: 1px solid var(--lightGrey);
+  display: flex;
+  align-items: center;
+  min-height: 60px;
+  padding: 10px;
+}
+
+.chatTitleBar label {
+  margin: 0 10px 0 0;
+}
+
+#userSearchTextBox {
+  border: none;
+  flex: 1;
+  font-weight: 200;
+  min-width: 350px;
+}
+
+#createChatButton {
+  border: none;
+  background-color: var(--blue);
+  color: #fff;
+  padding: 7px 20px;
+  margin: 10px auto;
+  border-radius: 40px;
+}
+
+#createChatButton:disabled {
+  background-color: var(--lightGrey);
+  color: var(--greyText);
+}
+
+.selectedUser {
+  font-weight: 500;
+  background-color: #cbe5fe;
+  color: #0084ff;
+  padding: 5px;
+  border-radius: 3px;
+  margin: 5px 5px 0 0;
+  display: inline-block;
+}
+
+.resultListItem {
+  padding: 7px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--lightGrey);
+}
+
+.resultListItem:hover {
+  background-color: #f2f2f2;
+}
+
+.resultDetailContainer {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.resultDetailContainer .heading {
+  font-weight: 500;
+}
+
+.resultDetailContainer .subText {
+  color: var(--greyText);
+  font-size: 14px;
+}
+
+.resultListItem img {
+  height: 100%;
+  width: 100%;
+  border-radius: 50%;
+}
+
+.resultsImageContainer {
+  height: 40px;
+  width: 40px;
+  position: relative;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+  padding: 5px;
+}
+
+.groupChatImage img {
+  height: 65%;
+  width: 65%;
+  position: absolute;
+  bottom: 0;
+  margin: 0;
+  border: 2px solid #fff;
+}
+
+.groupChatImage img:first-of-type {
+  top: 0;
+  right: 0;
+}
+
+/* 把超出的文字變成 ...  */
+.ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chatTitleBarContainer {
+  border-bottom: 1px solid var(--lightGrey);
+  display: flex;
+  align-items: center;
+  padding: var(--spacing);
+}
+
+#chatName {
+  width: 100%;
+  border: 1px solid transparent;
+  padding: 0 5px;
+}
+
+#chatName:hover {
+  border: 1px solid var(--lightGrey);
+  cursor: text;
 }
