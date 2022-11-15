@@ -8,9 +8,11 @@ block content
       const chatId = '!{ chat._id }'
     .chatPageContainer
       .chatTitleBarContainer
+        +createChatImage(chat, userLoggedIn)
         span#chatName This is the chat
       .mainContainer
         .chatContainer
+          .chatMessages
           .footer
             textarea(name="messageInput", placeholder="Type a message...")
             button.sendMessageButton

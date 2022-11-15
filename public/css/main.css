@@ -472,6 +472,13 @@ button i, button span {
   flex: 1;
 }
 
+.mainContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+
 .chatTitleBar {
   border-bottom: 1px solid var(--lightGrey);
   display: flex;
@@ -595,4 +602,59 @@ button i, button span {
 #chatName:hover {
   border: 1px solid var(--lightGrey);
   cursor: text;
+}
+
+.chatContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
+}
+
+.chatContainer .footer {
+  display: flex;
+  padding: var(--spacing);
+  flex-shrink: 0;
+}
+
+.chatContainer .footer textarea {
+  flex: 1;
+  resize: none;
+  background-color: rgba(0, 0, 0, .05);
+  border-radius: 18px;
+  border: none;
+  padding: 8px 16px;
+  height: 38px;
+  scroll-snap-type: none;
+  overflow:hidden;
+}
+
+.chatContainer .footer button {
+  background-color: transparent;
+  color: var(--blue);
+  font-size: 24px;
+}
+
+.chatMessages {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: var(--spacing);
+}
+
+.chatImageContainer {
+  display: flex;
+  flex-direction: row-reverse;
+  /* 這是關於重疊圖片的排序(由左至右) */
+  height: 100%;
+  margin-right: 10px;
+}
+
+.chatImageContainer img {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  margin-left: -10px;
 }
