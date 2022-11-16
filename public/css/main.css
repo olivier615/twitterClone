@@ -656,5 +656,25 @@ button i, button span {
   height: 40px;
   border: 2px solid #fff;
   border-radius: 50%;
+}
+
+.chatImageContainer img:not(:last-child),
+.chatImageContainer .userCount {
   margin-left: -10px;
+}
+
+.chatImageContainer .userCount {
+  height: 40px;
+  width: 40px;
+  background-color: #f1f1f1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  border: 2px solid #fff;
+}
+
+#chatNameTextBox {
+  width: 100%;
 }
