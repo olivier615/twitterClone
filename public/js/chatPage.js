@@ -20,3 +20,26 @@ $('#chatNameButton').click(() => {
     }
   })
 })
+
+$('.sendMessageButton').click(() => {
+  messageSubmitted()
+})
+
+$('.inputTextBox').keydown((event) => {
+  if (event.which === 13 && !event.shiftKey) {
+    messageSubmitted()
+    return false // 取消切換下一行
+  }
+})
+
+const messageSubmitted = () => {
+  const content = $('.inputTextBox').val().trim()
+  if (content != '') {
+    sendMessage(content)
+    $('.inputTextBox').val('')
+  }
+}
+
+const sendMessage = (content) => {
+  console.log(content)
+}
