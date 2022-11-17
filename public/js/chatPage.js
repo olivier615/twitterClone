@@ -41,5 +41,7 @@ const messageSubmitted = () => {
 }
 
 const sendMessage = (content) => {
-  console.log(content)
+  $.post('/api/massages', { content, chatId }, (data, status, xhr) => {
+    console.log(data)
+  })
 }
