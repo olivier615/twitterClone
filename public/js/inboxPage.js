@@ -22,16 +22,24 @@ const outputChatList = (chatList, container) => {
 const createChatHtml = (chatData) => {
   const chatName = getChatName(chatData)
   const image = getChatImageElement(chatData)
-  const latestMessage = 'This is the latest message'
+  const latestMessage = getLatestMessage(chatData.latestMessage)
   return `
     <a href="/messages/${ chatData._id }" class="resultListItem">
       ${ image }
       <div class="resultDetailContainer ellipsis">
         <span class="heading ellipsis">${ chatName }</span>
-        <span class="subText ellipsis">${ latestMessage }</span>
+        <span class="subText ellipsis">${ latestMessage || 'New chat' }</span>
       </div>
     </a>
   `
+}
+
+const getLatestMessage = (latestMessage) => {
+  if (latestMessage != null) {
+    const { content } = latestMessage
+    const { firstName, lastName } =  latestMessage.sender
+    return `${ firstName } ${ lastName }: ${ content }`
+  }
 }
 
 const getChatImageElement = (chatData) => {

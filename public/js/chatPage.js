@@ -2,6 +2,15 @@ $(document).ready(() => {
   $.get(`/api/chats/${ chatId }`, (data) => {
     $('#chatName').text(getChatName(data))
   })
+  $.get(`/api/chats/${ chatId }/messages`, (data) => {
+    const messages = []
+    data.forEach(message => {
+      const html = createMessageHtml(message)
+      messages.push(html)
+    })
+    const messagesHtml = messages.join('')
+    addMessagesHtmlToPage(messagesHtml)
+  })
 })
 
 $('#chatNameButton').click(() => {
@@ -32,6 +41,11 @@ $('.inputTextBox').keydown((event) => {
   }
 })
 
+const addMessagesHtmlToPage = (html) => {
+  $('.chatMessages').append(html)
+  // todo: scroll to bottom
+}
+
 const messageSubmitted = () => {
   const content = $('.inputTextBox').val().trim()
   if (content != '') {
@@ -42,6 +56,11 @@ const messageSubmitted = () => {
 
 const sendMessage = (content) => {
   $.post('/api/messages', { content, chatId }, (data, status, xhr) => {
+    if (xhr.status !== 201) {
+      alert('Could not send message')
+      $('.inputTextBox').val(content)
+      return
+    }
     addChatMessageHtml(data)
   })
 }
@@ -52,7 +71,7 @@ const addChatMessageHtml = (message) => {
     return
   }
   const messageDiv = createMessageHtml(message)
-  $('.chatMessages').append(messageDiv)
+  addMessagesHtmlToPage(messageDiv)
 }
 
 const createMessageHtml = (message) => {
