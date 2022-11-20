@@ -7,7 +7,8 @@ const bodyParser = require('body-parser')
 const mongoose = require('./database')
 const session = require('express-session')
 
-const sever = app.listen(port, () => console.log('Sever listening on ' + port))
+const server = app.listen(port, () => console.log('Sever listening on ' + port))
+const io = require('socket.io')(server, { pingTimeout: 60000 })
 
 app.engine('pug', require('pug').__express)
 app.set('view engine', 'pug')
@@ -62,4 +63,15 @@ app.get('/', requireLogin, (req, res, next) => {
     userLoggedInJs: JSON.stringify(req.session.user)
   }
   res.status(200).render('home', payload)
+})
+
+io.on('connection', (socket) => {
+  socket.on('setup', (userData) => {
+    // setup 是自定義名稱，需與 client 端的 emit 對應
+    socket.join(userData._id) // 這裡的 join 與 javascript 不同，單純就是加入
+    socket.emit('connected')
+  })
+  socket.on('join room', room => socket.join(room))
+  socket.on('typing', room => socket.in(room).emit('typing'))
+  // in 代表只在這個 room 發布 emit
 })

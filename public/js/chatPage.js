@@ -1,4 +1,6 @@
 $(document).ready(() => {
+  socket.emit('join room', chatId)
+  socket.on('typing', () => $('.typingDots').show())
   $.get(`/api/chats/${ chatId }`, (data) => {
     $('#chatName').text(getChatName(data))
   })
@@ -12,6 +14,9 @@ $(document).ready(() => {
     })
     const messagesHtml = messages.join('')
     addMessagesHtmlToPage(messagesHtml)
+    scrollToBottom(false)
+    $('.loadingSpinnerContainer').remove()
+    $('.chatContainer').css('visibility', 'visible')
   })
 })
 
@@ -37,11 +42,16 @@ $('.sendMessageButton').click(() => {
 })
 
 $('.inputTextBox').keydown((event) => {
+  updateTyping()
   if (event.which === 13 && !event.shiftKey) {
     messageSubmitted()
     return false // 取消切換下一行
   }
 })
+
+const updateTyping = () => {
+  socket.emit('typing', chatId)
+}
 
 const addMessagesHtmlToPage = (html) => {
   $('.chatMessages').append(html)
@@ -74,6 +84,7 @@ const addChatMessageHtml = (message) => {
   }
   const messageDiv = createMessageHtml(message, null, '')
   addMessagesHtmlToPage(messageDiv)
+  scrollToBottom(true)
 }
 
 const createMessageHtml = (message, nextMessage, lastSenderId) => {
@@ -115,4 +126,15 @@ const createMessageHtml = (message, nextMessage, lastSenderId) => {
     </div>
   </li>
   `
+}
+
+const scrollToBottom = (animated) => {
+  const container = $('.chatMessages')
+  const scrollHeight = container[0].scrollHeight
+  if (animated) {
+    container.animate({ scrollTop: scrollHeight }, 'slow')
+  }
+  else {
+    container.scrollTop(scrollHeight)
+  }
 }
