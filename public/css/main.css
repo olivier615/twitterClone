@@ -743,3 +743,23 @@ button i, button span {
 .chatMessages .message.theirs.last:not(.first) .messageBody {
   border-top-left-radius: 2px;
 }
+
+.senderName {
+  color: rgba(0, 0, 0, .4);
+}
+
+.chatMessages .imageContainer {
+  height: 24px;
+  width: 24px;
+  margin-right: 7px;
+}
+
+.chatMessages img {
+  height: 100%;
+  border-radius: 50%;
+  vertical-align: bottom;
+}
+
+.chatMessages .message.last {
+  margin-bottom: 5px;
+}

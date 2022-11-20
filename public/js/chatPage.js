@@ -85,11 +85,30 @@ const createMessageHtml = (message, nextMessage, lastSenderId) => {
   const isLast = nextSenderId != currentSenderId
   const isMine = message.sender._id == userLoggedIn._id
   let liClassName = isMine ? 'mine' : 'theirs'
-  if (isFirst) liClassName += ' first' // 多一個空白格確保不會跟前一個 class 黏在一起
-  if (isLast) liClassName += ' last'
+  let nameElement = ''
+  if (isFirst) {
+    liClassName += ' first' // 多一個空白格確保不會跟前一個 class 黏在一起
+    if (!isMine) {
+      nameElement = `<span class="senderName">${ senderName }</span>`
+    }
+  }
+  let profileImage = ''
+  if (isLast) {
+    liClassName += ' last'
+    profileImage = `<img src="${ sender.profilePic }">`
+  }
+  let imageContainer = ''
+  if (!isMine) {
+    imageContainer = `
+    <div class="imageContainer">
+      ${ profileImage }
+    </div>`
+  }
   return `
   <li class="message ${ liClassName }">
+    ${ imageContainer }
     <div class="messageContainer">
+      ${ nameElement }
       <span class="messageBody">
         ${ message.content }
       </span>
