@@ -577,3 +577,12 @@ const getOtherChatUser = (users) => {
   if (users.length == 1) return users // means you are in a chat with yourself
   return users.filter(user => user._id !== userLoggedIn._id)
 }
+
+const messageReceived = (newMessage) => {
+  if ($('.chatContainer').length) {
+      // show popup notification
+  }
+  else {
+    addChatMessageHtml(newMessage)
+  }
+}

@@ -25,6 +25,7 @@ router.post("/", async (req, res, next) => {
   .then(async message => {
       message = await message.populate("sender")
       message = await message.populate("chat")
+      message = await User.populate(message, { path: 'chat.users' })
       // 這兩個 await 後面到底需要加 .execPopulate() 嗎?
       Chat.findByIdAndUpdate(chatId, { latestMessage: message })
       .catch(error => console.log(error))

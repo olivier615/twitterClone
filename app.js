@@ -72,6 +72,16 @@ io.on('connection', (socket) => {
     socket.emit('connected')
   })
   socket.on('join room', room => socket.join(room))
-  socket.on('typing', room => socket.in(room).emit('typing'))
   // in 代表只在這個 room 發布 emit
+  socket.on('typing', room => socket.in(room).emit('typing'))
+  socket.on('stop typing', room => socket.in(room).emit('stop typing'))
+  socket.on('new message', newMessage => {
+    const { chat, sender } = newMessage
+    if (!chat.users) return console.log('Chat.users not defined')
+    chat.users.forEach(user => {
+      if (user._id == sender._id) return
+      console.log(user._id) // populate 有問題！
+      socket.in(user._id).emit('message received', newMessage)
+    })
+  })
 })
