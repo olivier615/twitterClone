@@ -578,8 +578,10 @@ const getOtherChatUser = (users) => {
   return users.filter(user => user._id !== userLoggedIn._id)
 }
 
+
 const messageReceived = (newMessage) => {
-  if ($('.chatContainer').length) {
+  if ($('.chatContainer').length == 0) {
+    // 因為 jquery 返回的是陣列，長度 0 表示不在對話區塊
       // show popup notification
   }
   else {

@@ -80,7 +80,6 @@ io.on('connection', (socket) => {
     if (!chat.users) return console.log('Chat.users not defined')
     chat.users.forEach(user => {
       if (user._id == sender._id) return
-      console.log(user._id) // populate 有問題！
       socket.in(user._id).emit('message received', newMessage)
     })
   })
