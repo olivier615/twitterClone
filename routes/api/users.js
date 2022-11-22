@@ -20,6 +20,7 @@ router.get("/", async (req, res, next) => {
         { firstName: { $regex: req.query.search, $options: 'i' } },
         { lastName: { $regex: req.query.search, $options: 'i' } },
         { username: { $regex: req.query.search, $options: 'i' } }
+        // $options: 'i' 不區分大小寫
       ]
     }
   }
