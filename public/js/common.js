@@ -573,6 +573,16 @@ const getChatName = (chatData) => {
   return chatName
 }
 
+$(document).on('click', '.notification.active', (e) => {
+  const container = $(e.target)
+  const notificationId = container.data().id
+  const href = container.attr('href')
+  e.preventDefault()
+  // 先用 e.preventDefault() 取消原先的動作，再透過 api 處理完 opened 再執行 success 執行 callback
+  const callback = () => window.location = href
+  markNotificationAsOpened(notificationId, callback)
+})
+
 const getOtherChatUser = (users) => {
   if (users.length == 1) return users // means you are in a chat with yourself
   return users.filter(user => user._id !== userLoggedIn._id)
@@ -587,4 +597,15 @@ const messageReceived = (newMessage) => {
   else {
     addChatMessageHtml(newMessage)
   }
+}
+
+const markNotificationAsOpened = (notificationId = null, callback = null) => {
+  // 參數預設值為 null 用來表示要把所有的通知改為已讀
+  if (callback == null) callback = () => location.reload()
+  const url = notificationId != null ? `/api/notifications/${ notificationId }/markAsOpened` : `/api/notifications/markAsOpened`
+  $.ajax({
+    url,
+    type: 'PUT',
+    success: () => callback()
+  })
 }
