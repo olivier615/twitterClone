@@ -2,6 +2,11 @@ let cropper
 let timer
 const selectedUsers = []
 
+$(document).ready(() => {
+  refreshMessagesBadge()
+  refreshNotificationsBadge()
+})
+
 $('#postTextarea, #replyTextarea').keyup((event) => {
   const textBox = $(event.target)
   const value = textBox.val().trim()
@@ -29,6 +34,7 @@ $('#submitPostButton, #submitReplyButton').click((event) => {
   }
   $.post('/api/posts', data, postData => {
     if (postData.replyTo) {
+      emitNotification(postData.replyTo.postedBy)
       location.reload()
     }
     else {
@@ -129,6 +135,7 @@ $(document).on('click', '.likeButton', (event) => {
       // 在 main.css 70 行，避免 i 跟 span 擋住點擊 button 的觸發事件
       if (postData.likes.includes(userLoggedIn._id)) {
         button.addClass('active')
+        emitNotification(postData.postedBy)
       }
       else {
         button.removeClass('active')
@@ -150,6 +157,7 @@ $(document).on('click', '.retweetButton', (event) => {
       // 在 main.css 70 行，避免 i 跟 span 擋住點擊 button 的觸發事件
       if (postData.retweetUsers.includes(userLoggedIn._id)) {
         button.addClass('active')
+        emitNotification(postData.postedBy)
       }
       else {
         button.removeClass('active')
@@ -178,6 +186,7 @@ $(document).on('click', '.followButton', (event) => {
       if (data.following && data.following.includes(userId)) {
         button.addClass('following')
         button.text('following')
+        emitNotification(userId)
       }
       else {
         button.removeClass('following')
@@ -590,13 +599,15 @@ const getOtherChatUser = (users) => {
 
 
 const messageReceived = (newMessage) => {
-  if ($('.chatContainer').length == 0) {
-    // 因為 jquery 返回的是陣列，長度 0 表示不在對話區塊
-      // show popup notification
+  if ($(`[data-room="${ newMessage.chat._id }"]`).length == 0) {
+    // [data-room] 是找到特定屬性(attr) 的方法
+    // 因為 jquery 返回的是陣列，長度 0 表示使用者不在當前對話區塊
+    showMessagePopup(newMessage)
   }
   else {
     addChatMessageHtml(newMessage)
   }
+  refreshMessagesBadge()
 }
 
 const markNotificationAsOpened = (notificationId = null, callback = null) => {
@@ -608,4 +619,161 @@ const markNotificationAsOpened = (notificationId = null, callback = null) => {
     type: 'PUT',
     success: () => callback()
   })
+}
+
+const refreshMessagesBadge = () => {
+  $.get('/api/chats', { unreadOnly: true }, (data) => {
+    const numResults = data.length
+    if (numResults > 0) {
+      $('#messagesBadge').text(numResults).addClass('active')
+    }
+    else {
+      $('#messagesBadge').text('').removeClass('active')
+    }
+  })
+}
+
+const refreshNotificationsBadge = () => {
+  $.get('/api/notifications', { unreadOnly: true }, (data) => {
+    const numResults = data.length
+    if (numResults > 0) {
+      $('#notificationBadge').text(numResults).addClass('active')
+    }
+    else {
+      $('#notificationBadge').text('').removeClass('active')
+    }
+  })
+}
+
+const showNotificationPopup = (data) => {
+  const html = createNotificationHtml(data)
+  const element = $(html)
+  element.hide().prependTo('#notificationList').slideDown('fast')
+  setTimeout(() => {
+    element.fadeOut(400)
+  }, 5000)
+}
+
+const showMessagePopup = (data) => {
+  if (!data.chat.latestMessage._id) {
+    data.chat.latestMessage = data
+  }
+  const html = createChatHtml(data.chat)
+  const element = $(html)
+  element.hide().prependTo('#notificationList').slideDown('fast')
+  setTimeout(() => {
+    element.fadeOut(400)
+  }, 5000)
+}
+
+const outputNotificationList = (notifications, container) => {
+  notifications.forEach(notification => {
+    const html = createNotificationHtml(notification)
+    container.append(html)
+  })
+  if (notifications.length == 0) {
+    container.append('<span class="noResults">Nothing to show</span>')
+  }
+}
+
+const createNotificationHtml = (notification) => {
+  const { userFrom, opened } = notification
+  const text = getNotificationText(notification)
+  const url = getNotificationUrl(notification)
+  const className = opened ? '' : 'active'
+  return `
+  <a href="${ url }" class="resultListItem notification ${ className }" data-id="${ notification._id }">
+    <div class="resultsImageContainer">
+      <img src="${ userFrom.profilePic }">
+    </div>
+    <div class="resultsDetailsContainer ellipsis">
+      <span class="ellipsis">
+        ${ text }
+      </span>
+    </div>
+  </a>
+  `
+}
+
+const getNotificationText = (notification) => {
+  const { userFrom, notificationType } = notification
+  if (!userFrom.firstName || !userFrom.lastName) {
+    return alert('User from data not populate')
+  }
+  const userFromName = `${ userFrom.firstName } ${ userFrom.lastName }`
+  let text = ''
+  if (notificationType == 'retweet') {
+    text = `${ userFromName } retweet one your posts`
+  }
+  else if (notificationType == 'postLike') {
+    text = `${ userFromName } liked one your posts`
+  }
+  else if (notificationType == 'reply') {
+    text = `${ userFromName } replied to one your posts`
+  }
+  else if (notificationType == 'follow') {
+    text = `${ userFromName } followed you`
+  }
+  return text
+}
+
+const getNotificationUrl = (notification) => {
+  const { notificationType, entityId } = notification
+  let url = '#'
+  if (notificationType == 'retweet' ||
+    notificationType == 'postLike' ||
+    notificationType == 'reply') {
+    url = `/posts/${ entityId }`
+  }
+  else if (notificationType == 'follow') {
+    url = `/profile/${ entityId }`
+  }
+  return url
+}
+
+const createChatHtml = (chatData) => {
+  const chatName = getChatName(chatData)
+  const image = getChatImageElement(chatData)
+  const latestMessage = getLatestMessage(chatData.latestMessage)
+  const activeClass = !chatData.latestMessage || chatData.latestMessage.readBy.includes(userLoggedIn._id) ? '' : 'active'
+  // 如果是群組還沒有任何對話 !chatData.latestMessage 就會是 true 則返回 ''
+  return `
+    <a href="/messages/${ chatData._id }" class="resultListItem ${ activeClass }">
+      ${ image }
+      <div class="resultDetailContainer ellipsis">
+        <span class="heading ellipsis">${ chatName }</span>
+        <span class="subText ellipsis">${ latestMessage || 'New chat' }</span>
+      </div>
+    </a>
+  `
+}
+
+const getLatestMessage = (latestMessage) => {
+  if (latestMessage != null) {
+    const { content } = latestMessage
+    const { firstName, lastName } =  latestMessage.sender
+    return `${ firstName } ${ lastName }: ${ content }`
+  }
+}
+
+const getChatImageElement = (chatData) => {
+  const otherChatUser = getOtherChatUser(chatData.users)
+  let groupChatClass = ""
+  let chatImage = getUserChatImageElement(otherChatUser[0])
+  if (otherChatUser.length > 1) {
+    groupChatClass = 'groupChatImage'
+    chatImage += getUserChatImageElement(otherChatUser[1])
+  }
+  return `
+  <div class="resultsImageContainer ${ groupChatClass }">
+    ${ chatImage }
+  </div>
+  `
+}
+
+const getUserChatImageElement = (user) => {
+  if (!user || !user.profilePic) return alert('User passed into function is invalid')
+  return `
+  <img src="${ user.profilePic }" alt="User's profile pic">
+  `
 }

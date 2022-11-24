@@ -79,6 +79,7 @@ io.on('connection', (socket) => {
   // in 代表只在這個 room 發布 emit
   socket.on('typing', room => socket.in(room).emit('typing'))
   socket.on('stop typing', room => socket.in(room).emit('stop typing'))
+  socket.on('notification received', room => socket.in(room).emit('notification received'))
   socket.on('new message', newMessage => {
     const { chat, sender } = newMessage
     if (!chat.users) return console.log('Chat.users not defined')
